@@ -1,6 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+using System;
+using Trackly;
 using Trackly.Components;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("TracklyContext") ??
+    throw new InvalidOperationException("Connection string TracklyContext not found")));
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
