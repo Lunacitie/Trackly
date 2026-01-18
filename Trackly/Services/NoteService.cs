@@ -38,6 +38,21 @@ namespace Trackly.Services
             _context.SaveChanges();
         }
 
+        public void UpdateNote(int userId, NoteModel updatedNote)
+        {
+            var note = _context.Notes
+                .FirstOrDefault(n => n.Id == updatedNote.Id && n.UserId == userId);
+
+            if (note == null)
+                return;
+
+            note.Date = updatedNote.Date;
+            note.Text = updatedNote.Text;
+
+            _context.SaveChanges();
+        }
+
+
         public bool DeleteNote(int userId, int noteId)
         {
             var note = _context.Notes.FirstOrDefault(n => n.Id == noteId && n.UserId == userId);
