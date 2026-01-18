@@ -314,6 +314,7 @@
             if (result != null)
             {
                 LoggedInUser.Id = result.Id;
+                LoggedInUser.User = result;
                 NavManager.NavigateTo("/Habits");
             }
             else

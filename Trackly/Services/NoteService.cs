@@ -31,30 +31,11 @@ namespace Trackly.Services
                 .FirstOrDefault(n => n.UserId == userId && n.Date == date);
         }
 
-        public NoteModel InsertNote(int userId, NoteModel note)
+        public void InsertNote(int userId, NoteModel note)
         {
-            var date = note.Date;
-            var text = (note.Text ?? "").Trim();
-
-            var existing = _context.Notes.FirstOrDefault(n => n.UserId == userId && n.Date == date);
-
-            if (existing == null)
-            {
-                var entity = new NoteModel
-                {
-                    UserId = userId,
-                    Date = date,
-                    Text = text
-                };
-
-                _context.Notes.Add(entity);
-                _context.SaveChanges();
-                return entity;
-            }
-
-            existing.Text = text;
+            note.UserId = userId;
+            _context.Notes.Add(note);
             _context.SaveChanges();
-            return existing;
         }
 
         public bool DeleteNote(int userId, int noteId)

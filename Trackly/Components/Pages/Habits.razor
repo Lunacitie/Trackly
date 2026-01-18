@@ -1,7 +1,716 @@
 ﻿@page "/Habits"
+@rendermode InteractiveServer
+@using System.Globalization
+@using BlazorBootstrap
+@using Trackly.Models
+@using Trackly.Services
 
-<h3>Habits</h3>
+<PageTitle>Trackly - Habits</PageTitle>
+
+<style>
+    :root {
+        --bg: #f6f7fb;
+        --card: #ffffff;
+        --border: #e6e8ef;
+        --text: #2b2f38;
+        --muted: #6b7280;
+        --accent: #4f6fd8;
+        --shadow: 0 10px 30px rgba(25,30,50,.08);
+        --radius: 18px;
+        --max: 95vw;
+    }
+
+    .page {
+        min-height: 100vh;
+        background: var(--bg);
+        padding: 24px;
+    }
+
+    .nav {
+        max-width: var(--max);
+        margin: 0 auto 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 18px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+    }
+
+    .brand {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+    }
+
+        .brand .title {
+            font-weight: 800;
+            color: var(--accent);
+            font-size: 1.25rem;
+            margin: 0;
+        }
+
+        .brand .sub {
+            margin-top: 2px;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: .95rem;
+        }
+
+    .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .user-chip {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        background: #fbfcff;
+        border-radius: 999px;
+        font-weight: 800;
+        color: var(--text);
+        max-width: 360px;
+    }
+
+        .user-chip .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(79,111,216,.55);
+            box-shadow: 0 0 0 4px rgba(79,111,216,.12);
+            flex: 0 0 auto;
+        }
+
+        .user-chip .name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+    .btn-logout {
+        border: none;
+        background: transparent;
+        color: var(--accent);
+        font-weight: 900;
+        padding: 8px 12px;
+        border-radius: 12px;
+        cursor: pointer;
+    }
+
+        .btn-logout:hover {
+            background: rgba(79,111,216,.1);
+        }
+
+    .content {
+        max-width: var(--max);
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        align-items: start;
+    }
+
+    .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 18px;
+    }
+
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .month {
+        display: flex;
+        gap: 10px;
+        font-weight: 900;
+        font-size: 1.1rem;
+        color: var(--text);
+        align-items: center;
+    }
+
+        .month button {
+            border: 1px solid var(--border);
+            background: #fbfcff;
+            border-radius: 12px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+    .meta {
+        color: var(--muted);
+        font-weight: 800;
+    }
+
+    .grid-wrap {
+        overflow: auto;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+    }
+
+    .grid {
+        width: 100%;
+        min-width: 0;
+        table-layout: fixed;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: #fff;
+    }
+
+        .grid thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #fbfcff;
+            border-bottom: 1px solid var(--border);
+            color: var(--muted);
+            font-weight: 900;
+            text-align: center;
+            padding: 6px 4px;
+            white-space: nowrap;
+        }
+
+            .grid thead th:first-child {
+                left: 0;
+                z-index: 3;
+                text-align: left;
+                padding-left: 14px;
+                border-right: 1px solid var(--border);
+                width: 240px;
+            }
+
+        .grid tbody td {
+            padding: 6px 4px;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+            .grid tbody td:first-child {
+                position: sticky;
+                left: 0;
+                z-index: 1;
+                background: #fff;
+                border-right: 1px solid var(--border);
+                text-align: left;
+                padding-left: 14px;
+                width: 240px;
+            }
+
+    .day-head,
+    .day-num {
+        width: 26px;
+        text-align: center;
+        font-weight: 900;
+    }
+
+    .day-num {
+        color: var(--text);
+        background: #fbfcff;
+    }
+
+    .goal-head,
+    .ach-head,
+    .goal-cell,
+    .ach-cell {
+        width: 80px;
+        text-align: center;
+        font-weight: 900;
+    }
+
+    .ach-good {
+        background: rgba(34,197,94,.22);
+    }
+
+    .ach-bad {
+        background: rgba(245,158,11,.22);
+    }
+
+    .modal-save {
+        width: 120px;
+        margin-top: 18px;
+        padding: 10px 14px;
+        border-radius: 14px;
+        display: inline-block;
+    }
+
+    .t-modal form {
+        margin-top: 6px;
+    }
+
+    .t-modal {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px;
+    }
+
+    .t-modal-title {
+        font-weight: 900;
+        color: var(--text);
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+
+    .modal-footer-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        width: 100%;
+    }
+
+    .btn-secondary-soft {
+        border: 1px solid var(--border);
+        background: #fbfcff;
+        color: var(--text);
+        font-weight: 900;
+        padding: 10px 14px;
+        border-radius: 14px;
+        cursor: pointer;
+    }
+
+        .btn-secondary-soft:hover {
+            background: rgba(79,111,216,.08);
+            border-color: rgba(79,111,216,.25);
+        }
+
+
+    .t-field {
+        margin-top: 14px;
+    }
+
+        .t-field label {
+            display: block;
+            margin: 0 0 6px;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+    .cell-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #fbfcff;
+        cursor: pointer;
+        font-weight: 900;
+        color: transparent;
+        user-select: none;
+    }
+
+    .cell-done {
+        background: rgba(79,111,216,.14);
+        border-color: rgba(79,111,216,.35);
+        color: var(--accent);
+    }
+
+    .section-title {
+        font-weight: 900;
+        margin: 0 0 12px;
+        color: var(--text);
+    }
+
+    .note-item {
+        border: 1px solid var(--border);
+        background: #fbfcff;
+        border-radius: 14px;
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+
+    .note-date {
+        font-weight: 900;
+        font-size: .9rem;
+        color: var(--muted);
+    }
+
+    .note-text {
+        font-weight: 700;
+        margin-top: 4px;
+        color: var(--text);
+        white-space: pre-wrap;
+    }
+
+    .empty {
+        color: var(--muted);
+        font-weight: 800;
+        padding: 10px 0;
+    }
+
+    .card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .plus-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #fbfcff;
+        color: var(--accent);
+        font-weight: 900;
+        font-size: 20px;
+        line-height: 1;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+    }
+
+        .plus-btn:hover {
+            background: rgba(79,111,216,.10);
+            border-color: rgba(79,111,216,.35);
+        }
+</style>
+
+<Modal @ref="modal" IsServiceModal="true">
+    <BodyTemplate>
+        @if (modalMode == "habit")
+        {
+            <div class="t-modal">
+                <div class="t-modal-title">Create New Habit</div>
+
+                <EditForm EditContext="@habitEditContext">
+                    <DataAnnotationsValidator />
+
+                    <div class="t-field">
+                        <label>Habit Name</label>
+                        <InputText class="form-control" @bind-Value="habitForm.Name" />
+                        <ValidationMessage For="() => habitForm.Name" />
+                    </div>
+
+                    <div class="t-field">
+                        <label>Goal</label>
+                        <InputNumber class="form-control" @bind-Value="habitForm.Goal" />
+                        <ValidationMessage For="() => habitForm.Goal" />
+                    </div>
+                </EditForm>
+            </div>
+        }
+        else if (modalMode == "note")
+        {
+            <div class="t-modal">
+                <div class="t-modal-title">Create New Note</div>
+
+                <EditForm EditContext="@noteEditContext">
+                    <DataAnnotationsValidator />
+
+                    <div class="t-field">
+                        <label>Date</label>
+                        <InputDate class="form-control" @bind-Value="noteDate" />
+                    </div>
+
+                    <div class="t-field">
+                        <label>Note</label>
+                        <InputTextArea class="form-control" style="min-height:140px" @bind-Value="noteForm.Text" />
+                        <ValidationMessage For="() => noteForm.Text" />
+                    </div>
+                </EditForm>
+            </div>
+        }
+    </BodyTemplate>
+
+    <FooterTemplate>
+        <div class="modal-footer-actions">
+            <Button class="btn-secondary-soft" onclick="@OnHideModalClick">Cancel</Button>
+            <Button class="btn-custom" onclick="@CurrentModalOptions.OnFooterButtonClick">@CurrentModalOptions.FooterButtonText</Button>
+        </div>
+    </FooterTemplate>
+
+</Modal>
+
+
+<div class="page">
+    <div class="nav">
+        <div class="brand">
+            <div class="title">Trackly</div>
+            <div class="sub">Track your habits easily</div>
+        </div>
+
+        <div class="nav-right">
+            <div class="user-chip" title="@DisplayUserTitle">
+                <span class="dot"></span>
+                <span class="name">@DisplayUserName</span>
+            </div>
+            <button class="btn-logout" @onclick="Logout">Logout</button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="card">
+            <div class="toolbar">
+                <div class="month">
+                    <button type="button" @onclick="PrevMonth">‹</button>
+                    <span>@monthTitle</span>
+                    <button type="button" @onclick="NextMonth">›</button>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div class="meta">@habits.Count habit(s) · @daysInMonth days</div>
+                    <button type="button" class="plus-btn" title="New Habit" @onclick="ShowHabitModal">+</button>
+                </div>
+            </div>
+
+            @if (habits.Count == 0)
+            {
+                <div class="empty">No habits yet.</div>
+            }
+            else
+            {
+                <div class="grid-wrap">
+                    <table class="grid">
+                        <thead>
+                            <tr>
+                                <th>Habit</th>
+                                @for (int d = 1; d <= daysInMonth; d++)
+                                {
+                                    var dt = new DateTime(currentMonth.Year, currentMonth.Month, d);
+                                    <th class="day-head">@dt.ToString("ddd", EnglishCulture)[0]</th>
+                                }
+                                <th class="goal-head">Goal</th>
+                                <th class="ach-head">Achieved</th>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                @for (int d = 1; d <= daysInMonth; d++)
+                                {
+                                    <th class="day-num">@d</th>
+                                }
+                                <th class="goal-head"></th>
+                                <th class="ach-head"></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var h in habits)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@h.Name</strong><br />
+                                    </td>
+
+                                    @for (int d = 1; d <= daysInMonth; d++)
+                                    {
+                                        var date = new DateOnly(currentMonth.Year, currentMonth.Month, d);
+                                        var done = IsDone(h.Id, date);
+
+                                        <td>
+                                            <button type="button"
+                                                    class="cell-btn @(done ? "cell-done" : "")"
+                                                    @onclick="() => Toggle(h.Id, date)">
+                                                ✓
+                                            </button>
+                                        </td>
+                                    }
+
+                                    <td class="goal-cell">@h.Goal</td>
+
+                                    @{
+                                        var achieved = CountDoneForHabitInMonth(h.Id);
+                                        var ok = achieved >= h.Goal;
+                                    }
+                                    <td class="ach-cell @(ok ? "ach-good" : "ach-bad")">@achieved</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <div class="card">
+            <div class="card-head">
+                <div class="section-title" style="margin:0;">Notes</div>
+                <button type="button" class="plus-btn" title="New Note" @onclick="ShowNoteModal">+</button>
+            </div>
+
+            @if (notes.Count == 0)
+            {
+                <div class="empty">No notes for this month.</div>
+            }
+            else
+            {
+                @foreach (var n in notes)
+                {
+                    <div class="note-item">
+                        <div class="note-date">@n.Date.ToString("dd MMM yyyy", EnglishCulture)</div>
+                        <div class="note-text">@n.Text</div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
 
 @code {
+    [Inject] private HabitService HabitService { get; set; }
+    [Inject] private NoteService NoteService { get; set; }
+    [Inject] private LoggedInUserModel LoggedInUser { get; set; }
+    [Inject] private NavigationManager Nav { get; set; }
+    [Inject] private ModalService ModalService { get; set; }
 
+    private static readonly CultureInfo EnglishCulture = CultureInfo.GetCultureInfo("en-US");
+
+    private DateTime currentMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);
+    private int daysInMonth => DateTime.DaysInMonth(currentMonth.Year, currentMonth.Month);
+    private string monthTitle => currentMonth.ToString("MMMM yyyy", EnglishCulture);
+
+    private Modal modal = default!;
+    private ModalOptions CurrentModalOptions { get; set; } = new();
+
+    private HabitModel habitForm = new();
+    private NoteModel noteForm = new();
+    private DateTime noteDate = DateTime.Today;
+    private string modalMode = "";
+
+    private EditContext habitEditContext;
+    private EditContext noteEditContext;
+
+    private List<HabitModel> habits = new();
+    private List<HabitEntryModel> entries = new();
+    private List<NoteModel> notes = new();
+
+    private string DisplayUserName => LoggedInUser?.User?.Username ?? "User";
+    private string DisplayUserTitle => LoggedInUser?.User?.Email ?? LoggedInUser?.User?.Username ?? "";
+
+    protected override void OnInitialized()
+    {
+        if (LoggedInUser == null || LoggedInUser.Id <= 0)
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
+
+        LoadMonth();
+    }
+
+    private void LoadMonth()
+    {
+        habits = HabitService.GetHabits(LoggedInUser.Id);
+        entries = HabitService.GetEntriesForMonth(LoggedInUser.Id, currentMonth.Year, currentMonth.Month);
+        notes = NoteService.GetNotesForMonth(LoggedInUser.Id, currentMonth.Year, currentMonth.Month);
+    }
+
+    private bool IsDone(int habitId, DateOnly date)
+        => entries.Any(e => e.HabitId == habitId && e.Date == date && e.IsDone);
+
+    private int CountDoneForHabitInMonth(int habitId)
+        => entries.Count(e => e.HabitId == habitId && e.IsDone);
+
+    private void Toggle(int habitId, DateOnly date)
+    {
+        HabitService.ToggleEntry(LoggedInUser.Id, habitId, date);
+        entries = HabitService.GetEntriesForMonth(LoggedInUser.Id, currentMonth.Year, currentMonth.Month);
+    }
+
+    private void PrevMonth()
+    {
+        currentMonth = currentMonth.AddMonths(-1);
+        LoadMonth();
+    }
+
+    private void NextMonth()
+    {
+        currentMonth = currentMonth.AddMonths(1);
+        LoadMonth();
+    }
+
+    private void Logout()
+    {
+        LoggedInUser.Id = 0;
+        LoggedInUser.User = null;
+        Nav.NavigateTo("/");
+    }
+
+    public class ModalOptions : ModalOption
+    {
+        public EventCallback OnFooterButtonClick { get; set; }
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+
+    private async Task ShowHabitModal()
+    {
+        modalMode = "habit";
+        habitForm = new HabitModel { Goal = 20 };
+        habitEditContext = new EditContext(habitForm);
+
+        CurrentModalOptions = new ModalOptions
+        {
+            Title = "",
+            Message = "",
+            Type = ModalType.Info,
+            FooterButtonText = "Save habit",
+            OnFooterButtonClick = EventCallback.Factory.Create(this, async () =>
+            {
+                if (habitEditContext.Validate())
+                    await CreateHabit();
+            }),
+            IsVerticallyCentered = true
+        };
+
+        await ModalService.ShowAsync(CurrentModalOptions);
+    }
+
+    private async Task ShowNoteModal()
+    {
+        modalMode = "note";
+        noteForm = new NoteModel();
+        noteDate = DateTime.Today;
+        noteEditContext = new EditContext(noteForm);
+
+        CurrentModalOptions = new ModalOptions
+        {
+            Title = "",
+            Message = "",
+            Type = ModalType.Info,
+            FooterButtonText = "Save note",
+            OnFooterButtonClick = EventCallback.Factory.Create(this, async () =>
+            {
+                if (noteEditContext.Validate())
+                    await SaveNote();
+            }),
+            IsVerticallyCentered = true
+        };
+
+        await ModalService.ShowAsync(CurrentModalOptions);
+    }
+
+
+    private async Task CreateHabit()
+    {
+        HabitService.CreateHabit(LoggedInUser.Id, habitForm);
+        LoadMonth();
+        await OnHideModalClick();
+    }
+
+    private async Task SaveNote()
+    {
+        noteForm.Date = DateOnly.FromDateTime(noteDate);
+        NoteService.InsertNote(LoggedInUser.Id, noteForm);
+        LoadMonth();
+        await OnHideModalClick();
+    }
 }

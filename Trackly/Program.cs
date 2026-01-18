@@ -16,6 +16,7 @@ builder.Services.AddScoped<HabitService>();
 builder.Services.AddSingleton<LoggedInUserModel>();
 
 // Add services to the container.
+builder.Services.AddBlazorBootstrap();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
