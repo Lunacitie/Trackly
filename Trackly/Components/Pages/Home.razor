@@ -1,7 +1,369 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@using Trackly.Models
+@using Trackly.Services
 
-<PageTitle>Home</PageTitle>
+<style>
+    :root {
+        --bg: #f6f7fb;
+        --card: #ffffff;
+        --border: #e6e8ef;
+        --text: #2b2f38;
+        --muted: #6b7280;
+        --accent: #4f6fd8;
+        --accent-soft: rgba(79, 111, 216, 0.12);
+        --shadow: 0 10px 30px rgba(25, 30, 50, 0.08);
+        --radius: 18px;
+    }
 
-<h1>Hello, world!</h1>
+    body {
+        height: 100vh;
+        overflow: hidden;
+    }
 
-Welcome to your new app.
+    .auth-page {
+        height: 100%;
+        background-color: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+    }
+
+    .auth-container {
+        width: 100%;
+        max-width: 1100px;
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 48px;
+        align-items: center;
+    }
+
+    .auth-left {
+        padding: 32px;
+    }
+
+    .brand {
+        font-size: 4rem;
+        font-weight: 800;
+        color: var(--accent);
+        letter-spacing: 0.5px;
+        margin-bottom: 10px;
+    }
+
+    .brand-subtitle {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 18px;
+    }
+
+    .brand-text {
+        color: var(--muted);
+        font-size: 1.05rem;
+        line-height: 1.7;
+        max-width: 420px;
+    }
+
+    .habit-preview {
+        margin-top: 28px;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+        max-width: 300px;
+    }
+
+    .habit-dot {
+        height: 36px;
+        border-radius: 10px;
+        background: var(--accent-soft);
+    }
+
+        .habit-dot:nth-child(2n) {
+            background: rgba(124, 92, 255, 0.18);
+        }
+
+        .habit-dot:nth-child(3n) {
+            background: rgba(66, 184, 131, 0.18);
+        }
+
+        .habit-dot:nth-child(5n) {
+            background: rgba(245, 158, 11, 0.18);
+        }
+
+    .auth-panel {
+        background: var(--card);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        padding: 30px;
+    }
+
+    .auth-title {
+        font-weight: 700;
+        color: var(--accent);
+        margin-bottom: 18px;
+    }
+
+    .auth-form {
+        margin-top: 8px;
+    }
+
+    .field {
+        margin-top: 14px;
+    }
+
+        .field label {
+            display: block;
+            margin: 0 0 6px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+    .field-row-2 {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 20px;
+        column-gap: 20px;
+        align-items: start;
+        width: 100%;
+    }
+
+        .field-row-2 .field {
+            margin-top: 14px;
+            min-width: 0;
+        }
+
+    .form-control {
+        width: 100%;
+        display: block;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        padding: 10px 12px;
+        background: #fbfcff;
+        box-sizing: border-box;
+    }
+
+        .form-control:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(79, 111, 216, 0.15);
+        }
+
+    .validation-message,
+    .text-danger {
+        display: block;
+        margin-top: 6px;
+        color: #d14343 !important;
+        font-size: 0.95rem;
+    }
+
+    .btn-custom {
+        width: 100%;
+        margin-top: 20px;
+        border-radius: 14px;
+        padding: 10px;
+        font-weight: 700;
+        background: linear-gradient(180deg, #4f6fd8, #445bd3);
+        border: none;
+        color: white;
+        box-shadow: 0 10px 20px rgba(79, 111, 216, 0.25);
+    }
+
+        .btn-custom:hover {
+            transform: translateY(-1px);
+        }
+
+    .auth-hint {
+        margin-top: 16px;
+        color: var(--muted);
+    }
+
+        .auth-hint a {
+            color: var(--accent);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+    .auth-error {
+        margin-top: 16px;
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(209, 67, 67, 0.08);
+        color: #b53636;
+        font-weight: 600;
+    }
+</style>
+
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-left">
+            <div class="brand">Trackly</div>
+            <div class="brand-subtitle">Track your habits easily</div>
+
+            <p class="brand-text">
+                Build better routines, stay consistent, and visualize your progress day by day.
+                Trackly helps you turn small daily actions into long-term habits.
+            </p>
+
+            <div class="habit-preview">
+                @for (int i = 0; i < 24; i++)
+                {
+                    <div class="habit-dot"></div>
+                }
+            </div>
+        </div>
+
+        <div class="auth-panel">
+            @if (IsRegistered)
+            {
+                <h2 class="auth-title">Login</h2>
+
+                <EditForm Model="this" OnValidSubmit="LogIn" FormName="LoginForm" class="auth-form">
+                    <div class="field">
+                        <label for="login-username">Username</label>
+                        <InputText id="login-username" class="form-control" @bind-Value="loginUsername" />
+                    </div>
+
+                    <div class="field">
+                        <label for="login-password">Password</label>
+                        <InputText id="login-password" type="password" class="form-control" @bind-Value="loginPassword" />
+                    </div>
+
+                    <button type="submit" class="btn btn-custom">Login</button>
+                </EditForm>
+
+                <p class="auth-hint">
+                    Don't have an account?
+                    <a href="#" @onclick="ToggleRegistration">Register</a>
+                </p>
+            }
+            else
+            {
+                <h2 class="auth-title">Registration</h2>
+
+                <EditForm Model="registrationModel" OnValidSubmit="Register" class="auth-form">
+                    <DataAnnotationsValidator />
+
+                    <div class="field-row-2">
+                        <div class="field">
+                            <label for="reg-username">Username</label>
+                            <InputText id="reg-username" class="form-control" @bind-Value="registrationModel.Username" />
+                            <ValidationMessage For="() => registrationModel.Username" />
+                        </div>
+
+                        <div class="field">
+                            <label for="reg-email">E-mail</label>
+                            <InputText id="reg-email" type="email" class="form-control" @bind-Value="registrationModel.Email" />
+                            <ValidationMessage For="() => registrationModel.Email" />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="reg-password">Password</label>
+                        <InputText id="reg-password" type="password" class="form-control" @bind-Value="registrationModel.Password" />
+                        <ValidationMessage For="() => registrationModel.Password" />
+                    </div>
+
+                    <div class="field">
+                        <label for="reg-confirm">Repeat password</label>
+                        <InputText id="reg-confirm" type="password" class="form-control" @bind-Value="registrationModel.ConfirmPassword" />
+                        <ValidationMessage For="() => registrationModel.ConfirmPassword" />
+                    </div>
+
+                    <button type="submit" class="btn btn-custom">Register</button>
+                </EditForm>
+
+                <p class="auth-hint">
+                    <a href="#" @onclick="ToggleRegistration">Back to login</a>
+                </p>
+            }
+
+            @if (IsErrorMessageVisible)
+            {
+                <div class="auth-error">@ErrorMessage</div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject] private NavigationManager NavManager { get; set; }
+    [Inject] private LoggedInUserModel LoggedInUser { get; set; }
+    [Inject] private UserService userService { get; set; }
+
+    [SupplyParameterFromForm] private string loginUsername { get; set; }
+    [SupplyParameterFromForm] private string loginPassword { get; set; }
+
+    [SupplyParameterFromForm] private RegistrationModel registrationModel { get; set; } = new();
+
+    private bool IsErrorMessageVisible { get; set; }
+    private string ErrorMessage { get; set; }
+    private bool IsRegistered { get; set; } = true;
+
+    private void ToggleRegistration()
+    {
+        IsRegistered = !IsRegistered;
+        IsErrorMessageVisible = false;
+    }
+
+    private void LogIn()
+    {
+        try
+        {
+            var result = userService.Login(loginUsername, loginPassword);
+            if (result != null)
+            {
+                LoggedInUser.Id = result.Id;
+                NavManager.NavigateTo("/Habits");
+            }
+            else
+            {
+                IsErrorMessageVisible = true;
+                ErrorMessage = "Username or password are not correct.";
+                loginUsername = "";
+                loginPassword = "";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error: " + ex.Message);
+            throw;
+        }
+    }
+
+    private void Register()
+    {
+        try
+        {
+            IsErrorMessageVisible = false;
+            ErrorMessage = "";
+
+            var username = userService.GetUser(registrationModel.Username);
+            var email = userService.GetUserByEmail(registrationModel.Email);
+            if (username is not null || email is not null)
+            {
+                IsErrorMessageVisible = true;
+                ErrorMessage = "User already exists!";
+                return;
+            }
+
+            var user = new UserModel
+            {
+                Username = registrationModel.Username,
+                Password = registrationModel.Password,
+                Email = registrationModel.Email
+            };
+
+            userService.CreateUser(user);
+
+            loginUsername = registrationModel.Username;
+            loginPassword = registrationModel.Password;
+            LogIn();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error: " + ex.Message);
+            throw;
+        }
+    }
+}
