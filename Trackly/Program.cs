@@ -11,6 +11,8 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(buil
     throw new InvalidOperationException("Connection string TracklyContext not found")));
 
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<NoteService>();
+builder.Services.AddScoped<HabitService>();
 builder.Services.AddSingleton<LoggedInUserModel>();
 
 // Add services to the container.
