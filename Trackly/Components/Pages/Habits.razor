@@ -46,19 +46,19 @@
         line-height: 1.1;
     }
 
-        .brand .title {
-            font-weight: 800;
-            color: var(--accent);
-            font-size: 1.25rem;
-            margin: 0;
-        }
+    .brand .title {
+        font-weight: 800;
+        color: var(--accent);
+        font-size: 1.25rem;
+        margin: 0;
+    }
 
-        .brand .sub {
-            margin-top: 2px;
-            color: var(--muted);
-            font-weight: 600;
-            font-size: .95rem;
-        }
+    .brand .sub {
+        margin-top: 2px;
+        color: var(--muted);
+        font-weight: 600;
+        font-size: .95rem;
+    }
 
     .nav-right {
         display: flex;
@@ -79,20 +79,20 @@
         max-width: 360px;
     }
 
-        .user-chip .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 999px;
-            background: rgba(79,111,216,.55);
-            box-shadow: 0 0 0 4px rgba(79,111,216,.12);
-            flex: 0 0 auto;
-        }
+    .user-chip .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(79,111,216,.55);
+        box-shadow: 0 0 0 4px rgba(79,111,216,.12);
+        flex: 0 0 auto;
+    }
 
-        .user-chip .name {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+    .user-chip .name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
     .btn-logout {
         border: none;
@@ -104,9 +104,9 @@
         cursor: pointer;
     }
 
-        .btn-logout:hover {
-            background: rgba(79,111,216,.1);
-        }
+    .btn-logout:hover {
+        background: rgba(79,111,216,.1);
+    }
 
     .content {
         max-width: var(--max);
@@ -143,15 +143,15 @@
         align-items: center;
     }
 
-        .month button {
-            border: 1px solid var(--border);
-            background: #fbfcff;
-            border-radius: 12px;
-            padding: 6px 10px;
-            cursor: pointer;
-            font-weight: 900;
-            color: var(--text);
-        }
+    .month button {
+        border: 1px solid var(--border);
+        background: #fbfcff;
+        border-radius: 12px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-weight: 900;
+        color: var(--text);
+    }
 
     .meta {
         color: var(--muted);
@@ -173,45 +173,45 @@
         background: #fff;
     }
 
-        .grid thead th {
-            position: sticky;
-            top: 0;
-            z-index: 2;
-            background: #fbfcff;
-            border-bottom: 1px solid var(--border);
-            color: var(--muted);
-            font-weight: 900;
-            text-align: center;
-            padding: 6px 4px;
-            white-space: nowrap;
-        }
+    .grid thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #fbfcff;
+        border-bottom: 1px solid var(--border);
+        color: var(--muted);
+        font-weight: 900;
+        text-align: center;
+        padding: 6px 4px;
+        white-space: nowrap;
+    }
 
-            .grid thead th:first-child {
-                left: 0;
-                z-index: 3;
-                text-align: left;
-                padding-left: 14px;
-                border-right: 1px solid var(--border);
-                width: 240px;
-            }
+    .grid thead th:first-child {
+        left: 0;
+        z-index: 3;
+        text-align: left;
+        padding-left: 14px;
+        border-right: 1px solid var(--border);
+        width: 240px;
+    }
 
-        .grid tbody td {
-            padding: 6px 4px;
-            border-bottom: 1px solid var(--border);
-            text-align: center;
-            white-space: nowrap;
-        }
+    .grid tbody td {
+        padding: 6px 4px;
+        border-bottom: 1px solid var(--border);
+        text-align: center;
+        white-space: nowrap;
+    }
 
-            .grid tbody td:first-child {
-                position: sticky;
-                left: 0;
-                z-index: 1;
-                background: #fff;
-                border-right: 1px solid var(--border);
-                text-align: left;
-                padding-left: 14px;
-                width: 240px;
-            }
+    .grid tbody td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        background: #fff;
+        border-right: 1px solid var(--border);
+        text-align: left;
+        padding-left: 14px;
+        width: 240px;
+    }
 
     .day-head,
     .day-num {
@@ -285,22 +285,22 @@
         cursor: pointer;
     }
 
-        .btn-secondary-soft:hover {
-            background: rgba(79,111,216,.08);
-            border-color: rgba(79,111,216,.25);
-        }
+    .btn-secondary-soft:hover {
+        background: rgba(79,111,216,.08);
+        border-color: rgba(79,111,216,.25);
+    }
 
 
     .t-field {
         margin-top: 14px;
     }
 
-        .t-field label {
-            display: block;
-            margin: 0 0 6px;
-            font-weight: 800;
-            color: var(--text);
-        }
+    .t-field label {
+        display: block;
+        margin: 0 0 6px;
+        font-weight: 800;
+        color: var(--text);
+    }
 
     .cell-btn {
         width: 28px;
@@ -318,6 +318,17 @@
         background: rgba(79,111,216,.14);
         border-color: rgba(79,111,216,.35);
         color: var(--accent);
+    }
+
+    .cell-btn:disabled {
+        cursor: not-allowed;
+        opacity: .45;
+        background: #f3f4f6 !important;
+        border-color: #e5e7eb !important;
+    }
+
+    .today-col {
+        background: rgba(79,111,216,.08) !important;
     }
 
     .section-title {
@@ -376,10 +387,10 @@
         cursor: pointer;
     }
 
-        .plus-btn:hover {
-            background: rgba(79,111,216,.10);
-            border-color: rgba(79,111,216,.35);
-        }
+    .plus-btn:hover {
+        background: rgba(79,111,216,.10);
+        border-color: rgba(79,111,216,.35);
+    }
 
     .habit-cell {
         display: flex;
@@ -406,25 +417,25 @@
         padding: 0;
     }
 
-        .icon-btn:hover {
-            background: rgba(79,111,216,.10);
-            border-color: rgba(79,111,216,.35);
-        }
+    .icon-btn:hover {
+        background: rgba(79,111,216,.10);
+        border-color: rgba(79,111,216,.35);
+    }
 
-        .icon-btn svg {
-            width: 16px;
-            height: 16px;
-            stroke: var(--accent);
-        }
+    .icon-btn svg {
+        width: 16px;
+        height: 16px;
+        stroke: var(--accent);
+    }
 
-        .icon-btn.danger svg {
-            stroke: #d14343;
-        }
+    .icon-btn.danger svg {
+        stroke: #d14343;
+    }
 
-        .icon-btn.danger:hover {
-            background: rgba(209,67,67,.10);
-            border-color: rgba(209,67,67,.25);
-        }
+    .icon-btn.danger:hover {
+        background: rgba(209,67,67,.10);
+        border-color: rgba(209,67,67,.25);
+    }
 
     .note-head {
         display: flex;
@@ -598,7 +609,10 @@
                                 @for (int d = 1; d <= daysInMonth; d++)
                                 {
                                     var dt = new DateTime(currentMonth.Year, currentMonth.Month, d);
-                                    <th class="day-head">@dt.ToString("ddd", EnglishCulture)[0]</th>
+                                    var isToday = DateOnly.FromDateTime(dt) == Today;
+                                    <th class="day-head @(isToday ? "today-col" : "")">
+                                        @dt.ToString("ddd", EnglishCulture)[0]
+                                    </th>
                                 }
                                 <th class="goal-head">Goal</th>
                                 <th class="ach-head">Achieved</th>
@@ -607,7 +621,9 @@
                                 <th></th>
                                 @for (int d = 1; d <= daysInMonth; d++)
                                 {
-                                    <th class="day-num">@d</th>
+                                    var dt = new DateTime(currentMonth.Year, currentMonth.Month, d);
+                                    var isToday = DateOnly.FromDateTime(dt) == Today;
+                                    <th class="day-num @(isToday ? "today-col" : "")">@d</th>
                                 }
                                 <th class="goal-head"></th>
                                 <th class="ach-head"></th>
@@ -645,15 +661,17 @@
                                         </div>
                                     </td>
 
-
                                     @for (int d = 1; d <= daysInMonth; d++)
                                     {
                                         var date = new DateOnly(currentMonth.Year, currentMonth.Month, d);
                                         var done = IsDone(h.Id, date);
+                                        var isFuture = date > Today;
+                                        var isToday = date == Today;
 
-                                        <td>
+                                        <td class="@(isToday ? "today-col" : "")">
                                             <button type="button"
                                                     class="cell-btn @(done ? "cell-done" : "")"
+                                                    disabled="@isFuture"
                                                     @onclick="() => Toggle(h.Id, date)">
                                                 ✓
                                             </button>
@@ -717,12 +735,12 @@
 
                         <div class="note-text">@n.Text</div>
                     </div>
-    
                 }
             }
         </div>
     </div>
 </div>
+
 
 @code {
     [Inject] private HabitService HabitService { get; set; }
@@ -759,6 +777,7 @@
 
     private string DisplayUserName => LoggedInUser?.User?.Username ?? "User";
     private string DisplayUserTitle => LoggedInUser?.User?.Email ?? LoggedInUser?.User?.Username ?? "";
+    private DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
 
     protected override void OnInitialized()
     {
