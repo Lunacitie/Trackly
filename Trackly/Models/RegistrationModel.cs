@@ -5,6 +5,7 @@ namespace Trackly.Models
     public class RegistrationModel
     {
         [Required(ErrorMessage = "Username is required.")]
+        [RegularExpression(@"^[a-zA-Z0-9_]{4,15}$", ErrorMessage ="Username is not valid.")]
         public string? Username { get; set; }
 
         [Required(ErrorMessage = "E-mail is required.")]

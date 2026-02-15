@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Text;
 using Trackly;
 using Trackly.Components;
 using Trackly.Models;
@@ -13,12 +16,34 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(buil
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<NoteService>();
 builder.Services.AddScoped<HabitService>();
+builder.Services.AddScoped<JwtService>();
 builder.Services.AddSingleton<LoggedInUserModel>();
 
 // Add services to the container.
 builder.Services.AddBlazorBootstrap();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+var jwt = builder.Configuration.GetSection("Jwt");
+var key = jwt["Key"]!;
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwt["Issuer"],
+            ValidAudience = jwt["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -32,6 +57,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseAntiforgery();
 
