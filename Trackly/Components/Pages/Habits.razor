@@ -437,6 +437,21 @@
         border-color: rgba(209,67,67,.25);
     }
 
+    .stats-btn {
+        border: 1px solid var(--border);
+        background: #fbfcff;
+        border-radius: 12px;
+        padding: 8px 12px;
+        cursor: pointer;
+        font-weight: 900;
+        color: var(--text);
+    }
+
+    .stats-btn:hover {
+        background: rgba(79,111,216,.10);
+        border-color: rgba(79,111,216,.35);
+    }
+
     .note-head {
         display: flex;
         align-items: center;
@@ -551,13 +566,59 @@
                 </div>
             </div>
         }
+        else if (modalMode == "stats")
+        {
+            <div class="t-modal">
+                <div class="section-title" style="margin:0 0 10px;">Statistics</div>
+
+                @if (statsLoading)
+                {
+                    <div class="empty">Loading...</div>
+                }
+                else if (habits.Count == 0)
+                {
+                    <div class="empty">No habits.</div>
+                }
+                else
+                {
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        @foreach (var uh in habits)
+                        {
+                            statsByUserHabitId.TryGetValue(uh.Id, out var s);
+
+                            <div class="note-item" style="margin:0;">
+                                <div style="font-weight:900; color:var(--text);">
+                                    @uh.Habit.Name
+                                </div>
+
+                                <div style="margin-top:6px; color:var(--muted); font-weight:800;">
+                                    Total: <span style="color:var(--text);">@((s?.TotalAccomplishments) ?? 0)</span>
+                                    &nbsp;·&nbsp;
+                                    Longest streak: <span style="color:var(--text);">@((s?.LongestStreak) ?? 0)</span>
+                                    &nbsp;·&nbsp;
+                                    Current streak: <span style="color:var(--text);">@((s?.CurrentStreak) ?? 0)</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
 
     </BodyTemplate>
 
     <FooterTemplate>
         <div class="modal-footer-actions">
-            <Button class="btn-secondary-soft" onclick="@OnHideModalClick">Cancel</Button>
-            <Button class="btn-custom" onclick="@CurrentModalOptions.OnFooterButtonClick">@CurrentModalOptions.FooterButtonText</Button>
+            <Button class="btn-secondary-soft" onclick="@OnHideModalClick">
+                @(modalMode == "stats" ? "Close" : "Cancel")
+            </Button>
+
+            @if (modalMode != "stats")
+            {
+                <Button class="btn-custom" onclick="@CurrentModalOptions.OnFooterButtonClick">
+                    @CurrentModalOptions.FooterButtonText
+                </Button>
+            }
         </div>
     </FooterTemplate>
 
@@ -590,8 +651,14 @@
 
                 <div style="display:flex; align-items:center; gap:12px;">
                     <div class="meta">@habits.Count habit(s) · @daysInMonth days</div>
+
+                    <button type="button" class="stats-btn" title="Statistics" @onclick="ShowStatsModal">
+                        Stats
+                    </button>
+
                     <button type="button" class="plus-btn" title="New Habit" @onclick="ShowHabitModal">+</button>
                 </div>
+
             </div>
 
             @if (habits.Count == 0)
@@ -760,6 +827,9 @@
     private HabitModel habitForm = new();
     private NoteModel noteForm = new();
     private DateTime noteDate = DateTime.Today;
+    private bool statsLoading;
+    private Dictionary<int, HabitStatsModel> statsByUserHabitId = new();
+
     private string modalMode = "";
     private int selectedHabitId;
     private string selectedHabitName = "";
@@ -1029,6 +1099,31 @@
 
         LoadMonth();
         await OnHideModalClick();
+    }
+
+    private async Task ShowStatsModal()
+    {
+        modalMode = "stats";
+        statsLoading = true;
+        statsByUserHabitId = new();
+
+        CurrentModalOptions = new ModalOptions
+        {
+            Title = "Statistics",
+            Message = "",
+            Type = ModalType.Dark,
+            FooterButtonText = "",
+            OnFooterButtonClick = EventCallback.Factory.Create(this, async () => { }),
+            IsVerticallyCentered = true
+        };
+
+        await ModalService.ShowAsync(CurrentModalOptions);
+
+        var ids = habits.Select(h => h.Id).ToList();
+        statsByUserHabitId = HabitService.GetStatsForUserHabits(LoggedInUser.Id, ids);
+
+        statsLoading = false;
+        StateHasChanged();
     }
 
 }

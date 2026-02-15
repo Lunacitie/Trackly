@@ -1,0 +1,123 @@
+[
+  {
+    "Name": "Drink 2L of water",
+    "DefaultGoal": 25
+  },
+  {
+    "Name": "Walk 8000 steps",
+    "DefaultGoal": 20
+  },
+  {
+    "Name": "Workout",
+    "DefaultGoal": 15
+  },
+  {
+    "Name": "Stretch 10 minutes",
+    "DefaultGoal": 20
+  },
+  {
+    "Name": "Meditate",
+    "DefaultGoal": 20
+  },
+  {
+    "Name": "Sleep 8 hours",
+    "DefaultGoal": 18
+  },
+  {
+    "Name": "No sugar today",
+    "DefaultGoal": 22
+  },
+  {
+    "Name": "Eat vegetables",
+    "DefaultGoal": 24
+  },
+  {
+    "Name": "Study 1 hour",
+    "DefaultGoal": 18
+  },
+  {
+    "Name": "Read 20 pages",
+    "DefaultGoal": 20
+  },
+  {
+    "Name": "Practice coding",
+    "DefaultGoal": 18
+  },
+  {
+    "Name": "Work on personal project",
+    "DefaultGoal": 14
+  },
+  {
+    "Name": "Review daily goals",
+    "DefaultGoal": 22
+  },
+  {
+    "Name": "Plan next day",
+    "DefaultGoal": 22
+  },
+  {
+    "Name": "Write journal entry",
+    "DefaultGoal": 16
+  },
+
+  {
+    "Name": "Gratitude practice",
+    "DefaultGoal": 18
+  },
+  {
+    "Name": "Digital detox 1 hour",
+    "DefaultGoal": 16
+  },
+  {
+    "Name": "No social media",
+    "DefaultGoal": 12
+  },
+  {
+    "Name": "Call a friend",
+    "DefaultGoal": 10
+  },
+  {
+    "Name": "Spend time outdoors",
+    "DefaultGoal": 18
+  },
+  {
+    "Name": "Listen to podcast",
+    "DefaultGoal": 12
+  },
+  {
+    "Name": "Clean workspace",
+    "DefaultGoal": 20
+  },
+  {
+    "Name": "Tidy room",
+    "DefaultGoal": 16
+  },
+  {
+    "Name": "Cook at home",
+    "DefaultGoal": 14
+  },
+  {
+    "Name": "Track expenses",
+    "DefaultGoal": 12
+  },
+  {
+    "Name": "Practice hobby",
+    "DefaultGoal": 12
+  },
+  {
+    "Name": "Water plants",
+    "DefaultGoal": 8
+  },
+  {
+    "Name": "No impulse spending",
+    "DefaultGoal": 20
+  },
+  {
+    "Name": "Learn something new",
+    "DefaultGoal": 12
+  },
+  {
+    "Name": "Weekly self-reflection",
+    "DefaultGoal": 4
+  }
+]
