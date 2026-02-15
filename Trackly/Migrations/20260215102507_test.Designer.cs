@@ -12,8 +12,8 @@ using Trackly;
 namespace Trackly.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260215092451_iThinkDone")]
-    partial class iThinkDone
+    [Migration("20260215102507_test")]
+    partial class test
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,12 +68,7 @@ namespace Trackly.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserModelId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserModelId");
 
                     b.ToTable("Habits");
                 });
@@ -127,8 +122,7 @@ namespace Trackly.Migrations
 
                     b.HasIndex("HabitId");
 
-                    b.HasIndex("UserId", "HabitId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserHabits");
                 });
@@ -169,13 +163,6 @@ namespace Trackly.Migrations
                     b.Navigation("UserHabit");
                 });
 
-            modelBuilder.Entity("Trackly.Models.HabitModel", b =>
-                {
-                    b.HasOne("Trackly.Models.UserModel", null)
-                        .WithMany("Habits")
-                        .HasForeignKey("UserModelId");
-                });
-
             modelBuilder.Entity("Trackly.Models.NoteModel", b =>
                 {
                     b.HasOne("Trackly.Models.UserModel", "User")
@@ -196,7 +183,7 @@ namespace Trackly.Migrations
                         .IsRequired();
 
                     b.HasOne("Trackly.Models.UserModel", "User")
-                        .WithMany()
+                        .WithMany("UserHabits")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -213,9 +200,9 @@ namespace Trackly.Migrations
 
             modelBuilder.Entity("Trackly.Models.UserModel", b =>
                 {
-                    b.Navigation("Habits");
-
                     b.Navigation("Notes");
+
+                    b.Navigation("UserHabits");
                 });
 #pragma warning restore 612, 618
         }

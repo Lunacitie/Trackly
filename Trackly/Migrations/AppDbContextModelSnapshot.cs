@@ -33,15 +33,15 @@ namespace Trackly.Migrations
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
-                    b.Property<int>("HabitId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsDone")
                         .HasColumnType("bit");
 
+                    b.Property<int>("UserHabitId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("HabitId", "Date")
+                    b.HasIndex("UserHabitId", "Date")
                         .IsUnique();
 
                     b.ToTable("HabitEntries");
@@ -55,19 +55,17 @@ namespace Trackly.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Goal")
+                    b.Property<int?>("DefaultGoal")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsSeed")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Habits");
                 });
@@ -97,6 +95,35 @@ namespace Trackly.Migrations
                     b.ToTable("Notes");
                 });
 
+            modelBuilder.Entity("Trackly.Models.UserHabitModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Goal")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HabitId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HabitId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserHabits");
+                });
+
             modelBuilder.Entity("Trackly.Models.UserModel", b =>
                 {
                     b.Property<int>("Id")
@@ -109,7 +136,7 @@ namespace Trackly.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -124,24 +151,13 @@ namespace Trackly.Migrations
 
             modelBuilder.Entity("Trackly.Models.HabitEntryModel", b =>
                 {
-                    b.HasOne("Trackly.Models.HabitModel", "Habit")
-                        .WithMany("Habits")
-                        .HasForeignKey("HabitId")
+                    b.HasOne("Trackly.Models.UserHabitModel", "UserHabit")
+                        .WithMany("Entries")
+                        .HasForeignKey("UserHabitId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Habit");
-                });
-
-            modelBuilder.Entity("Trackly.Models.HabitModel", b =>
-                {
-                    b.HasOne("Trackly.Models.UserModel", "User")
-                        .WithMany("Habits")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
+                    b.Navigation("UserHabit");
                 });
 
             modelBuilder.Entity("Trackly.Models.NoteModel", b =>
@@ -155,16 +171,35 @@ namespace Trackly.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Trackly.Models.HabitModel", b =>
+            modelBuilder.Entity("Trackly.Models.UserHabitModel", b =>
                 {
-                    b.Navigation("Habits");
+                    b.HasOne("Trackly.Models.HabitModel", "Habit")
+                        .WithMany()
+                        .HasForeignKey("HabitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Trackly.Models.UserModel", "User")
+                        .WithMany("UserHabits")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Habit");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Trackly.Models.UserHabitModel", b =>
+                {
+                    b.Navigation("Entries");
                 });
 
             modelBuilder.Entity("Trackly.Models.UserModel", b =>
                 {
-                    b.Navigation("Habits");
-
                     b.Navigation("Notes");
+
+                    b.Navigation("UserHabits");
                 });
 #pragma warning restore 612, 618
         }

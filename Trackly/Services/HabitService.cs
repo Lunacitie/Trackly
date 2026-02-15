@@ -12,30 +12,34 @@ namespace Trackly.Services
             _context = context;
         }
 
-        public List<HabitModel> GetHabits(int userId)
+        public List<UserHabitModel> GetHabits(int userId)
         {
-            return _context.Habits
+            return _context.UserHabits
                 .AsNoTracking()
-                .Where(h => h.UserId == userId)
-                .OrderBy(h => h.Name)
+                .Include(uh => uh.Habit)
+                .Where(uh => uh.UserId == userId && uh.IsActive)
+                .OrderBy(uh => uh.Habit.Name)
                 .ToList();
         }
 
-        public HabitModel? GetHabit(int userId, int habitId)
+        public UserHabitModel? GetHabit(int userId, int userHabitId)
         {
-            return _context.Habits
+            return _context.UserHabits
                 .AsNoTracking()
-                .FirstOrDefault(h => h.Id == habitId && h.UserId == userId);
+                .Include(uh => uh.Habit)
+                .FirstOrDefault(uh => uh.Id == userHabitId && uh.UserId == userId);
         }
 
-        public HabitModel CreateHabit(int userId, HabitModel habit)
+        public UserHabitModel CreateHabit(int userId, string habitName, int goal)
         {
-            habit.Id = 0;
-            habit.UserId = userId;
+            habitName = (habitName ?? "").Trim();
+            if (habitName.Length == 0)
+                throw new ArgumentException("Habit name is required.");
 
             var normalized = habitName.ToLower();
 
-            var habit = _context.Habits.FirstOrDefault(h => h.IsSeed && h.Name.ToLower() == normalized);
+            var habit = _context.Habits
+                .FirstOrDefault(h => h.IsSeed && h.Name.ToLower() == normalized);
 
             if (habit == null)
             {
@@ -51,14 +55,20 @@ namespace Trackly.Services
             }
 
             var existingUserHabit = _context.UserHabits
-                .FirstOrDefault(uh => uh.UserId == userId && uh.HabitId == habit.Id);
+                .FirstOrDefault(uh =>
+                    uh.UserId == userId &&
+                    uh.HabitId == habit.Id);
 
             if (existingUserHabit != null)
             {
                 existingUserHabit.Goal = goal;
                 existingUserHabit.IsActive = true;
                 _context.SaveChanges();
-                _context.Entry(existingUserHabit).Reference(x => x.Habit).Load();
+
+                _context.Entry(existingUserHabit)
+                    .Reference(x => x.Habit)
+                    .Load();
+
                 return existingUserHabit;
             }
 
@@ -73,76 +83,123 @@ namespace Trackly.Services
             _context.UserHabits.Add(userHabit);
             _context.SaveChanges();
 
-            _context.Entry(userHabit).Reference(x => x.Habit).Load();
+            _context.Entry(userHabit)
+                .Reference(x => x.Habit)
+                .Load();
+
             return userHabit;
         }
 
-
         public bool UpdateHabit(int userId, int userHabitId, int goal, string? newHabitName = null)
         {
-            var existing = _context.Habits.FirstOrDefault(h => h.Id == habit.Id && h.UserId == userId);
-            if (existing == null) return false;
+            var userHabit = _context.UserHabits
+                .Include(uh => uh.Habit)
+                .FirstOrDefault(uh =>
+                    uh.Id == userHabitId &&
+                    uh.UserId == userId);
 
-            existing.Name = habit.Name;
-            existing.Goal = habit.Goal;
+            if (userHabit == null) return false;
+
+            userHabit.Goal = goal;
+
+            if (!string.IsNullOrWhiteSpace(newHabitName) &&
+                userHabit.Habit.IsSeed == false)
+            {
+                userHabit.Habit.Name = newHabitName.Trim();
+            }
 
             _context.SaveChanges();
             return true;
         }
 
-        public bool DeleteHabit(int userId, int habitId)
+        public bool DeleteHabit(int userId, int userHabitId)
         {
-            var habit = _context.Habits.FirstOrDefault(h => h.Id == habitId && h.UserId == userId);
-            if (habit == null) return false;
+            var userHabit = _context.UserHabits
+                .Include(uh => uh.Habit)
+                .FirstOrDefault(uh =>
+                    uh.Id == userHabitId &&
+                    uh.UserId == userId);
 
-            var entries = _context.HabitEntries.Where(e => e.HabitId == habitId).ToList();
-            if (entries.Count > 0) _context.HabitEntries.RemoveRange(entries);
+            if (userHabit == null) return false;
 
-            _context.Habits.Remove(habit);
+            var entries = _context.HabitEntries
+                .Where(e => e.UserHabitId == userHabitId)
+                .ToList();
+
+            if (entries.Count > 0)
+                _context.HabitEntries.RemoveRange(entries);
+
+            _context.UserHabits.Remove(userHabit);
+
+            if (!userHabit.Habit.IsSeed)
+            {
+                var stillUsed = _context.UserHabits
+                    .Any(uh =>
+                        uh.HabitId == userHabit.HabitId &&
+                        uh.Id != userHabit.Id);
+
+                if (!stillUsed)
+                    _context.Habits.Remove(userHabit.Habit);
+            }
+
             _context.SaveChanges();
             return true;
         }
+
 
         public List<HabitEntryModel> GetEntriesForMonth(int userId, int year, int month)
         {
             var monthStart = new DateOnly(year, month, 1);
             var monthEndExclusive = monthStart.AddMonths(1);
 
-            var habitIds = _context.Habits
+            var userHabitIds = _context.UserHabits
                 .AsNoTracking()
-                .Where(h => h.UserId == userId)
-                .Select(h => h.Id)
+                .Where(uh => uh.UserId == userId && uh.IsActive)
+                .Select(uh => uh.Id)
                 .ToList();
 
-            if (habitIds.Count == 0) return new List<HabitEntryModel>();
+            if (userHabitIds.Count == 0)
+                return new List<HabitEntryModel>();
 
             return _context.HabitEntries
                 .AsNoTracking()
-                .Where(e => habitIds.Contains(e.HabitId) && e.Date >= monthStart && e.Date < monthEndExclusive)
+                .Where(e =>
+                    userHabitIds.Contains(e.UserHabitId) &&
+                    e.Date >= monthStart &&
+                    e.Date < monthEndExclusive)
                 .ToList();
         }
 
-        public bool ToggleEntry(int userId, int habitId, DateOnly date)
+        public bool ToggleEntry(int userId, int userHabitId, DateOnly date)
         {
-            var ownsHabit = _context.Habits.Any(h => h.Id == habitId && h.UserId == userId);
-            if (!ownsHabit) return false;
+            var owns = _context.UserHabits
+                .Any(uh => uh.Id == userHabitId && uh.UserId == userId);
 
-            var existing = _context.HabitEntries.FirstOrDefault(e => e.HabitId == habitId && e.Date == date);
+            if (!owns) return false;
+
+            var existing = _context.HabitEntries
+                .FirstOrDefault(e =>
+                    e.UserHabitId == userHabitId &&
+                    e.Date == date);
 
             if (existing == null)
             {
                 _context.HabitEntries.Add(new HabitEntryModel
                 {
-                    HabitId = habitId,
+                    UserHabitId = userHabitId,
                     Date = date,
                     IsDone = true
                 });
             }
-            else _context.HabitEntries.Remove(existing);
+            else
+            {
+                _context.HabitEntries.Remove(existing);
+            }
 
             _context.SaveChanges();
             return true;
         }
+
 
         public void EnsureDefaultHabitsForUser(int userId)
         {
@@ -188,13 +245,14 @@ namespace Trackly.Services
                 .Select(uh => uh.Id)
                 .ToHashSet();
 
-            if (ownedIds.Count == 0) return new();
-
             var today = DateOnly.FromDateTime(DateTime.Today);
 
             var done = _context.HabitEntries
                 .AsNoTracking()
-                .Where(e => ownedIds.Contains(e.UserHabitId) && e.IsDone && e.Date <= today)
+                .Where(e =>
+                    ownedIds.Contains(e.UserHabitId) &&
+                    e.IsDone &&
+                    e.Date <= today)
                 .Select(e => new { e.UserHabitId, e.Date })
                 .Distinct()
                 .ToList();
@@ -203,7 +261,7 @@ namespace Trackly.Services
                 .GroupBy(x => x.UserHabitId)
                 .ToDictionary(
                     g => g.Key,
-                    g => g.Select(x => x.Date).Distinct().OrderBy(d => d).ToList()
+                    g => g.Select(x => x.Date).OrderBy(d => d).ToList()
                 );
 
             var result = new Dictionary<int, HabitStatsModel>();
@@ -216,8 +274,7 @@ namespace Trackly.Services
                     continue;
                 }
 
-                var total = dates.Count;
-
+                int total = dates.Count;
                 int longest = 1;
                 int run = 1;
 
@@ -228,15 +285,13 @@ namespace Trackly.Services
                         run++;
                         if (run > longest) longest = run;
                     }
-                    else
-                    {
-                        run = 1;
-                    }
+                    else run = 1;
                 }
 
                 int current = 0;
                 var set = new HashSet<DateOnly>(dates);
                 var d0 = today;
+
                 while (set.Contains(d0))
                 {
                     current++;

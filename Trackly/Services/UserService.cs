@@ -6,10 +6,12 @@ namespace Trackly.Services
     {
         private readonly AppDbContext _context;
         private readonly JwtService _jwt;
-        public UserService(AppDbContext context, JwtService jwt)
+        private readonly HabitService _habitService;
+        public UserService(AppDbContext context, JwtService jwt, HabitService habitService)
         {
             _context = context;
             _jwt = jwt;
+            _habitService = habitService;
         }
 
         public (UserModel user, string token)? Register(string username, string email, string password)
@@ -29,6 +31,8 @@ namespace Trackly.Services
 
             _context.Users.Add(user);
             _context.SaveChanges();
+
+            _habitService.EnsureDefaultHabitsForUser(user.Id);
 
             var token = _jwt.GenerateToken(user);
             return (user, token);

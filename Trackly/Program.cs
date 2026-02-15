@@ -16,6 +16,7 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(buil
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<NoteService>();
 builder.Services.AddScoped<HabitService>();
+builder.Services.AddScoped<HabitSeeder>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddSingleton<LoggedInUserModel>();
 
@@ -46,6 +47,12 @@ builder.Services
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<HabitSeeder>();
+    seeder.SeedHabitsFromJson();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

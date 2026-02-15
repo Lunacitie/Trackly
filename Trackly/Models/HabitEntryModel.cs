@@ -6,8 +6,8 @@ namespace Trackly.Models
     public class HabitEntryModel
     {
         [Key] public int Id { get; set; }
-        [ForeignKey(nameof(Habit))]public int HabitId { get; set; }
-        public HabitModel Habit { get; set; } = null!;
+        [ForeignKey(nameof(UserHabit))] public int UserHabitId { get; set; }
+        public UserHabitModel UserHabit { get; set; } = null!;
         [Required] public DateOnly Date { get; set; }
         public bool IsDone { get; set; }
     }

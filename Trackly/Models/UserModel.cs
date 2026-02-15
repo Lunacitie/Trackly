@@ -8,7 +8,7 @@ namespace Trackly.Models
         public string Username { get; set; }
         public string PasswordHash { get; set; }
         public string Email { get; set; }
-        public ICollection<HabitModel> Habits { get; set; } = new List<HabitModel>();
+        public ICollection<UserHabitModel> UserHabits { get; set; } = new List<UserHabitModel>();
         public ICollection<NoteModel> Notes { get; set; } = new List<NoteModel>();
     }
 }
