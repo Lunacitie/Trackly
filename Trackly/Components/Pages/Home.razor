@@ -313,8 +313,8 @@
             var result = userService.Login(loginUsername, loginPassword);
             if (result != null)
             {
-                LoggedInUser.Id = result.Id;
-                LoggedInUser.User = result;
+                LoggedInUser.Id = result.Value.user.Id;
+                LoggedInUser.User = result.Value.user;
                 NavManager.NavigateTo("/Habits");
             }
             else
@@ -348,14 +348,7 @@
                 return;
             }
 
-            var user = new UserModel
-            {
-                Username = registrationModel.Username,
-                Password = registrationModel.Password,
-                Email = registrationModel.Email
-            };
-
-            userService.CreateUser(user);
+            userService.Register(registrationModel.Username, registrationModel.Email, registrationModel.Password);
 
             loginUsername = registrationModel.Username;
             loginPassword = registrationModel.Password;
